@@ -49,7 +49,7 @@ for (let index = 0; index <= 0xff; index++) {
 	const command = index % 2 === 0
 		? 0x01
 		: 0x02;
-	writeCharToScreen('a', command, index);
+	writeCharToScreen('*', command, index);
 }
 
 writableBytes[i++] = instructions.HLT;
