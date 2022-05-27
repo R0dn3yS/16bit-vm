@@ -32,24 +32,24 @@ const cpu = new CPU(MM);
 let i = 0;
 
 const writeCharToScreen = (char, command, position) => {
-	writableBytes[i++] = instructions.MOV_LIT_REG;
-	writableBytes[i++] = command;
-	writableBytes[i++] = char.charCodeAt(0);
-	writableBytes[i++] = R1;
-	
-	writableBytes[i++] = instructions.MOV_REG_MEM;
-	writableBytes[i++] = R1;
-	writableBytes[i++] = 0x30;
-	writableBytes[i++] = position;
+  writableBytes[i++] = instructions.MOV_LIT_REG;
+  writableBytes[i++] = command;
+  writableBytes[i++] = char.charCodeAt(0);
+  writableBytes[i++] = R1;
+  
+  writableBytes[i++] = instructions.MOV_REG_MEM;
+  writableBytes[i++] = R1;
+  writableBytes[i++] = 0x30;
+  writableBytes[i++] = position;
 };
 
 writeCharToScreen(' ', 0xff, 0);
 
 for (let index = 0; index <= 0xff; index++) {
-	const command = index % 2 === 0
-		? 0x01
-		: 0x02;
-	writeCharToScreen('*', command, index);
+  const command = index % 2 === 0
+    ? 0x01
+    : 0x02;
+  writeCharToScreen('*', command, index);
 }
 
 writableBytes[i++] = instructions.HLT;
