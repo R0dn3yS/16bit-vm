@@ -31,27 +31,27 @@ const disambiguateOrderOfOperations = expr => {
     if (level > candidateExpression.priority) {
       candidateExpression = {
         priority: level,
-        a: i - 1,
-        b: i + 1,
-        op: expr.value[i],
+        a: i-1,
+        b: i+1,
+        op: expr.value[i]
       }
     }
   }
 
   const newExpression = T.bracketedExpression([
     ...expr.value.slice(0, candidateExpression.a),
-    binaryOperation({
+    T.binaryOperation({
       a: disambiguateOrderOfOperations(expr.value[candidateExpression.a]),
       b: disambiguateOrderOfOperations(expr.value[candidateExpression.b]),
       op: candidateExpression.op
     }),
-  ...expr.value.slice(candidateExpression.b + 1),
+  ...expr.value.slice(candidateExpression.b + 1)
   ]);
 
   return disambiguateOrderOfOperations(newExpression);
 }
 
-const last = a => a[a.length - 1];
+const last = a => a[a.length-1];
 
 const typifyBracketedExpression = expr => {
   return T.bracketedExpression(expr.map(element => {

@@ -1,9 +1,10 @@
 const A = require('arcsecond');
 const {
-  litReg,
   regReg,
-  regMem,
+  litReg,
+  regLit,
   memReg,
+  regMem,
   litMem,
   regPtrReg,
   litOffReg,
@@ -19,7 +20,7 @@ const mov = A.choice([
   regMem('mov', 'MOV_REG_MEM'),
   litMem('mov', 'MOV_LIT_MEM'),
   regPtrReg('mov', 'MOV_REG_PTR_REG'),
-  litOffReg('mov', 'MOV_LIT_OFF_REG'),
+  litOffReg('mov', 'MOV_LIT_OFF_REG')
 ]);
 
 const add = A.choice([
@@ -30,6 +31,7 @@ const add = A.choice([
 const sub = A.choice([
   regReg('sub', 'SUB_REG_REG'),
   litReg('sub', 'SUB_LIT_REG'),
+  regLit('sub', 'SUB_REG_LIT'),
 ]);
 
 const mul = A.choice([
@@ -39,12 +41,12 @@ const mul = A.choice([
 
 const lsf = A.choice([
   regReg('lsf', 'LSF_REG_REG'),
-  litReg('lsf', 'LSF_LIT_REG'),
+  regLit('lsf', 'LSF_REG_LIT'),
 ]);
 
 const rsf = A.choice([
   regReg('rsf', 'RSF_REG_REG'),
-  litReg('rsf', 'RSF_LIT_REG'),
+  regLit('rsf', 'RSF_REG_LIT'),
 ]);
 
 const and = A.choice([
@@ -73,7 +75,7 @@ const jeq = A.choice([
 
 const jne = A.choice([
   regMem('jne', 'JNE_REG'),
-  litMem('jne', 'JNE_LIT'),
+  litMem('jne', 'JMP_NOT_EQ'),
 ]);
 
 const jlt = A.choice([

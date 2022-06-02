@@ -1,7 +1,7 @@
 const readline = require('readline');
 const createMemory = require('./create-memory');
 const CPU = require('./cpu');
-const instructions = require('./instructions');
+const instructions = require('./instructions/meta');
 const MemoryMapper = require('./memory-mapper');
 const createScreenDevice = require('./screen-device');
 

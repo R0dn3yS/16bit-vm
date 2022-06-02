@@ -39,6 +39,12 @@ const variable = A.char('!')
   .chain(() => validIdentifier)
   .map(T.variable);
 
+const label = A.sequenceOf([
+  validIdentifier,
+  A.char(':'),
+  A.optionalWhitespace
+]).map(([labelName]) => labelName).map(T.label);
+
 const operator = A.choice([
   A.char('+').map(T.opPlus),
   A.char('-').map(T.opMinus),
@@ -46,6 +52,7 @@ const operator = A.choice([
 ]);
 
 const peek = A.lookAhead(A.regex(/^./));
+
 
 module.exports = {
   register,
@@ -56,4 +63,5 @@ module.exports = {
   operator,
   upperOrLowerStr,
   peek,
+  label
 };
