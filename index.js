@@ -1,57 +1,61 @@
-const readline = require('readline');
 const createMemory = require('./create-memory');
 const CPU = require('./cpu');
-const instructions = require('./instructions/meta');
 const MemoryMapper = require('./memory-mapper');
-const createScreenDevice = require('./screen-device');
-
-const IP = 0;
-const ACC = 1;
-const R1 = 2;
-const R2 = 3;
-const R3 = 4;
-const R4 = 5;
-const R5 = 6;
-const R6 = 7;
-const R7 = 8;
-const R8 = 9;
-const SP = 10;
-const FP = 11;
 
 const MM = new MemoryMapper();
 
-const memory = createMemory(256*256);
-MM.map(memory, 0, 0xffff);
+const DataViewMethods = [
+  'getUint8',
+  'getUint16',
+  'setUint8',
+  'setUint16',
+];
 
-// Map 0xFF bytes of the address space to an "output device" - just stdout
-MM.map(createScreenDevice(), 0x3000, 0x30ff, true);
+const createBankedMemory = (n, bankSize, cpu) => {
+  const bankBuffers = Array.from({length: n}, () => new ArrayBuffer(bankSize));
+  const banks = bankBuffers.map(ab => new DataView(ab));
 
-const writableBytes = new Uint8Array(memory.buffer);
+  const forwardToDataView = name => (...args) => {
+    const bankIndex = cpu.getRegister('mb') % n;
+    const memoryBankToUse = banks[bankIndex];
+    return memoryBankToUse[name](...args);
+  };
 
-const cpu = new CPU(MM);
-let i = 0;
+  const interface = DataViewMethods.reduce((dvOut, fnName) => {
+    dvOut[fnName] = forwardToDataView(fnName);
+    return dvOut;
+  }, {});
 
-const writeCharToScreen = (char, command, position) => {
-  writableBytes[i++] = instructions.MOV_LIT_REG;
-  writableBytes[i++] = command;
-  writableBytes[i++] = char.charCodeAt(0);
-  writableBytes[i++] = R1;
-  
-  writableBytes[i++] = instructions.MOV_REG_MEM;
-  writableBytes[i++] = R1;
-  writableBytes[i++] = 0x30;
-  writableBytes[i++] = position;
-};
-
-writeCharToScreen(' ', 0xff, 0);
-
-for (let index = 0; index <= 0xff; index++) {
-  const command = index % 2 === 0
-    ? 0x01
-    : 0x02;
-  writeCharToScreen('*', command, index);
+  return interface;
 }
 
-writableBytes[i++] = instructions.HLT;
+const bankSize = 0xff;
+const nBanks = 8;
+const cpu = new CPU(MM);
 
-cpu.run();
+const memoryBankDevice = createBankedMemory(nBanks, bankSize, cpu);
+MM.map(memoryBankDevice, 0, bankSize);
+
+const regularMemory = createMemory(0xff00);
+MM.map(regularMemory, bankSize, 0xffff, true);
+
+console.log('writing value 1 to address 0');
+MM.setUint16(0, 1);
+console.log('reading value at address 0: ', MM.getUint16(0));
+
+console.log('\n::: switching memory bank (0 -> 1)');
+cpu.setRegister('mb', 1);
+console.log('reading value at address 0: ', MM.getUint16(0));
+
+console.log('writing value 42 to address 1');
+MM.setUint16(0, 42);
+console.log('\n::: switching memory bank (1 -> 2)');
+cpu.setRegister('mb', 2);
+console.log('reading value at address 0: ', MM.getUint16(0));
+
+console.log('\n::: switching memory bank (2 -> 1)');
+cpu.setRegister('mb', 1);
+console.log('reading value at address 0: ', MM.getUint16(0));
+console.log('\n::: switching memory bank (1 -> 0)');
+cpu.setRegister('mb', 0);
+console.log('reading value at address 0: ', MM.getUint16(0));

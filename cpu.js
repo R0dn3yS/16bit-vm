@@ -1,20 +1,13 @@
 const createMemory = require('./create-memory');
+const registers = require('./registers');
 const instructions = require('./instructions/meta');
 
 class CPU {
   constructor(memory) {
     this.memory = memory;
 
-    this.registerNames = [
-      'ip', 'acc',
-      'r1', 'r2', 'r3', 'r4',
-      'r5', 'r6', 'r7', 'r8',
-      'sp', 'fp',
-    ];
-
-    this.registers = createMemory(this.registerNames.length * 2);
-
-    this.registerMap = this.registerNames.reduce((map, name, i) => {
+    this.registers = createMemory(registers.length * 2);
+    this.registerMap = registers.reduce((map, name, i) => {
       map[name] = i * 2;
       return map;
     }, {});
