@@ -3,7 +3,7 @@ const registers = require('./registers');
 const instructions = require('./instructions/meta');
 
 class CPU {
-  constructor(memory) {
+  constructor(memory, interruptVectorAddress = 0x1000) {
     this.memory = memory;
 
     this.registers = createMemory(registers.length * 2);
@@ -11,6 +11,10 @@ class CPU {
       map[name] = i * 2;
       return map;
     }, {});
+
+    this.interruptVectorAddress = interruptVectorAddress;
+    this.isInInterruptHandler = false;
+    this.setRegister('im', 0xffff);
 
     this.setRegister('sp', 0xffff - 1);
     this.setRegister('fp', 0xffff - 1);
@@ -120,8 +124,43 @@ class CPU {
     return (this.fetch() % this.registerNames.length) * 2;
   }
 
+  handleInterrupt(value) {
+    const interruptVectorIndex = value % 0xf;
+
+    const isUnmasked = Boolean((1 << interruptVectorIndex) & this.getRegister('im'));
+    if (!isUnmasked) {
+      return;
+    }
+
+    const addressPointer = this.interruptVectorAddress + (interruptVectorIndex * 2);
+    const address = this.memory.getUint16(addressPointer);
+
+    if (!this.isInInterruptHandler) {
+      // Push 0 for the number of arguments
+      this.push(0);
+      this.pushState();
+    }
+
+    this.isInInterruptHandler = true;
+    this.setRegister('ip', address);
+  }
+
   execute(instruction) {
     switch (instruction) {
+      // Return from interrupt
+      case instructions.RET_INT.opcode: {
+        this.isInInterruptHandler = false;
+        this.popState();
+        return;
+      }
+
+      // Software Triggered Interrupt
+      case instructions.INT.opcode: {
+        const interruptValue = this.fetch16();
+        this.handleInterrupt(interruptValue);
+        return;
+      }
+
       // Move Literal intro Register
       case instructions.MOV_LIT_REG.opcode: {
         const literal = this.fetch16();

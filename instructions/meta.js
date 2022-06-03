@@ -30,6 +30,20 @@ const instructionTypeSizes = {
 
 const meta = [
   {
+    instruction: 'INT',
+    opcode: 0xFD,
+    type: instructionTypes.singleLit,
+    size: instructionTypeSizes.singleLit,
+    mnemonic: 'int',
+  },
+  {
+    instruction: 'RET_INT',
+    opcode: 0xFC,
+    type: instructionTypes.noArgs,
+    size: instructionTypeSizes.noArgs,
+    mnemonic: 'rti',
+  },
+  {
     instruction: 'MOV_LIT_REG',
     opcode: 0x10,
     type: instructionTypes.litReg,

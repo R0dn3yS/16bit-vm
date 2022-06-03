@@ -1,19 +1,13 @@
 const A = require('arcsecond');
 const instructionsParser = require('./instructions');
-const {label} = require('./common');
+const { data8, data16 } = require('./data');
+const constantParser = require('./constant');
+const { label } = require('./common');
 
 module.exports = A.many (A.choice([
+  data8,
+  data16,
+  constantParser,
   instructionsParser,
   label
-]));
-
-// const Peek = new A.Parser(state => {
-//   debugger;
-//   return statel
-// })
-
-// module.exports = A.coroutine(function* () {
-
-//   const res = yield Peek;
-//   debugger;
-// });
+])).chain(res => A.endOfInput.map(() => res));

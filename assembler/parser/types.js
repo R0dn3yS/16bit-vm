@@ -15,6 +15,8 @@ const squareBracketExpression = asType('SQUARE_BRACKET_EXPRESSION');
 
 const instruction = asType('INSTRUCTION');
 const label = asType('LABEL');
+const data = asType('DATA');
+const constant = asType('CONSTANT');
 
 module.exports = {
   register,
@@ -28,5 +30,7 @@ module.exports = {
   bracketedExpression,
   squareBracketExpression,
   instruction,
-  label
+  label,
+  data,
+  constant,
 };
